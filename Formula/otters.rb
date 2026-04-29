@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.9"
+  version "1.0.0-alpha.10"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.9/otters_darwin_amd64.tar.gz"
-      sha256 "e7926f7ede56540d4ca51c25c41480460b5e373c07e885341038cdf61ae7c57f"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.10/otters_darwin_amd64.tar.gz"
+      sha256 "7d1e9b04860ade797972615945894787a630c6e0fc82278363648ad484a57811"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.9/otters_darwin_arm64.tar.gz"
-      sha256 "1c10c5a1337cb50386110defaad507da068ba4fa0fb2a09016e431024b17f66f"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.10/otters_darwin_arm64.tar.gz"
+      sha256 "7f0a7b9ffc986f34858bf51923ee00adb08bc188160cf0f81ddd51d3ba4e703a"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.9/otters_linux_amd64.tar.gz"
-      sha256 "c3e24d12fa7870bb86b87fb91f34601570bd4c64879675cf22f9750e715e6b4b"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.10/otters_linux_amd64.tar.gz"
+      sha256 "a03eccc66677333523e00472be6cbb3da4608e0937bf2341a88fd795069366fe"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.9/otters_linux_arm64.tar.gz"
-      sha256 "30ff522880a14fe24a2ac14eea0a89a50e8c89bf797c15fd9d9742681ed75ebd"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.10/otters_linux_arm64.tar.gz"
+      sha256 "ddb95c14b5f4b3c152ba34bc76c1e9f0160b4cc84d884ea75ca7d7242c66312a"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -58,14 +58,28 @@ class Otters < Formula
       To run it in the foreground for debugging:
         ottersd serve
 
-      Default paths:
-        socket:      ~/.otters/otters.sock
-        agent data:  ~/.otters/agents
-        logs:        #{var}/log/ottersd.{log,err.log} (service mode only)
+      Default paths and endpoints:
+        socket:        ~/.otters/otters.sock
+        agent data:    ~/.otters/agents
+        logs:          #{var}/log/ottersd.{log,err.log} (service mode only)
+        web UI + API:  http://127.0.0.1:5000  (loopback by default)
+
+      The daemon ships with an embedded web UI baked into the binary —
+      no separate install. Once ottersd is running, open
+      http://127.0.0.1:5000 in your browser. The Connect/gRPC API is
+      reachable on the same listener under /api.
+
+      Customise the listener:
+        ottersd serve --http-addr 127.0.0.1:5050   # change the port
+        ottersd serve --no-ui                      # API only
+        ottersd serve --no-http                    # CLI only (Unix socket)
+
+      Non-loopback binds require --auth-token.
 
       Get started once the daemon is running:
         otters --help
         otters run <Agentfile>
+        open http://127.0.0.1:5000
 
       Stop the service:
         brew services stop otters

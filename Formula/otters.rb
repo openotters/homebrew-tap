@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.41"
+  version "1.0.0-alpha.42"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.41/otters_darwin_amd64.tar.gz"
-      sha256 "ea53cadc851b49cce57d2524ace27210fe55b5603f23043a07b65466ac0ff118"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.42/otters_darwin_amd64.tar.gz"
+      sha256 "4b07460e4d125fc802020c3f6356aae25391a5e1ad8d38d46ccf724866a8bdde"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.41/otters_darwin_arm64.tar.gz"
-      sha256 "a112790498c82e67782c12fddda3da1ccddda0b6f5b7830ae159705012bf0cc4"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.42/otters_darwin_arm64.tar.gz"
+      sha256 "765ce2aff986df63302b17c35fd5a17aa8bc724e6f5bd9603073eeda2e34247d"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.41/otters_linux_amd64.tar.gz"
-      sha256 "a3f108897cf2fbf4c8f2161daa90dcd303280bb39ccb319c66a1dc16748cc8ec"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.42/otters_linux_amd64.tar.gz"
+      sha256 "8bebf035b5fce9ddcc768bbeb06db0460233cdf0890b7b65255ef2008800c80d"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.41/otters_linux_arm64.tar.gz"
-      sha256 "cd3c454d89f7c91bc033e9fd213a36e2247f7a7c210ab9274c4cbb60e176777e"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.42/otters_linux_arm64.tar.gz"
+      sha256 "278fc7897b0ed3d33310b790cd61d0ed5f6fd04494324345d9716910e1cb3bda"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"

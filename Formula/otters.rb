@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.120"
+  version "1.0.0-alpha.121"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.120/otters_darwin_amd64.tar.gz"
-      sha256 "f080c8cb709688b8fc4e6699b6d0744d7917801f27a4924d0a1f46fadadf8184"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.121/otters_darwin_amd64.tar.gz"
+      sha256 "07e640292ce5d12626d8e61c60a4c0ec056100d567472863e981ac535cf04e6b"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.120/otters_darwin_arm64.tar.gz"
-      sha256 "7908b53e34bcfb1fb24fd64b77b691b14350c2b89824186c86eacc07f131aa81"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.121/otters_darwin_arm64.tar.gz"
+      sha256 "5f2d7f9cdb54f7d208735a38ac7f112196a6d2d28c01a91061f614900834a249"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.120/otters_linux_amd64.tar.gz"
-      sha256 "727af49127e37592c7372ca770ba88cb7b5d165e2a7304900fe1060fe8e0daf0"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.121/otters_linux_amd64.tar.gz"
+      sha256 "1cfeab796c7a76503bd5077ec10146867b1af13146f2553d0f5f8252c9c2a978"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.120/otters_linux_arm64.tar.gz"
-      sha256 "288418a1b97f01172411c84a3eb3c284e89c2629122069e4e82633dada2fa430"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.121/otters_linux_arm64.tar.gz"
+      sha256 "22c71af8c15571afe7b6c656f770d178bd6bd7021e332b7e5e037dc5afca360c"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -79,9 +79,8 @@ class Otters < Formula
 
       Re-run `otters init` any time; it picks up where you left off.
 
-      To remove openotters entirely:
-        otters clean                            # wipes daemon state, agents, providers
-        brew uninstall openotters/tap/otters    # removes the binaries
+      Reset openotters state any time:
+        otters clean    # removes running agents + ~/.otters (config, sessions, JWTs)
 
       Default paths and endpoints:
         socket:        ~/.otters/otters.sock

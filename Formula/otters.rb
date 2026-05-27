@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.123"
+  version "1.0.0-alpha.124"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.123/otters_darwin_amd64.tar.gz"
-      sha256 "7da3a6f79d789566202d98a0e0a5bf0971ede4917739acec505f069b1521db3d"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.124/otters_darwin_amd64.tar.gz"
+      sha256 "37f2d0ddf58d1d37a291955c5127b15b5cc8b25e3419a7aad903089ec23e594e"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.123/otters_darwin_arm64.tar.gz"
-      sha256 "58054a6a1e530957c09fdecafe0f7877b3d3a738b48e7fd610fa0db5a2a363ef"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.124/otters_darwin_arm64.tar.gz"
+      sha256 "d68256d9e1459ab30995fd66bd9f7856fae3bb0f005c3f383305274cae0457cd"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.123/otters_linux_amd64.tar.gz"
-      sha256 "13a623a161954ed62c658c41d7ae44f02d64e2246625a45083e6cee1133941eb"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.124/otters_linux_amd64.tar.gz"
+      sha256 "f2dea1e8f9056966c28e44c96db9956363d8129b2fa5666f1d6749e3b084ebe3"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.123/otters_linux_arm64.tar.gz"
-      sha256 "393c29546facb2b7407c49434270aa5e2854d0424a54776734c2ef122dd88112"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.124/otters_linux_arm64.tar.gz"
+      sha256 "d3614ed40605ee2e536ec40ab7e740b98ae93a9f800c338d2b02e7dfd42fd4f6"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -74,13 +74,15 @@ class Otters < Formula
 
   def caveats
     <<~EOS
-      🦦  First-time setup:
-        otters init     # interactive wizard: starts the daemon, picks an executor, adds a provider, spawns a starter agent, and drops you into chat — about 60 seconds end to end.
+      🦦  After install:
 
-      Re-run `otters init` any time; it picks up where you left off.
+        brew services start otters     # start the daemon (auto-restarts on upgrade)
+        otters executor docker         # optional, recommended (alt: system)
+        brew services restart otters   # only if you changed the executor above
+        otters provider add            # configure your model provider
 
-      Reset openotters state any time:
-        otters clean    # removes running agents + ~/.otters (config, sessions, JWTs)
+      Reset state any time:
+        otters clean
 
       Default paths and endpoints:
         socket:        ~/.otters/otters.sock
@@ -88,29 +90,13 @@ class Otters < Formula
         logs:          #{var}/log/ottersd.{log,err.log}
         web UI + API:  http://127.0.0.1:5500  (loopback by default)
 
-      The daemon ships with an embedded web UI baked into the binary —
-      no separate install. Open http://127.0.0.1:5500 in your browser.
-      The Connect/gRPC API is reachable on the same listener under /api.
-
-      Customise the listener (then `brew services restart otters`):
-        ottersd serve --http-addr 127.0.0.1:8080   # change the port
-        ottersd serve --no-ui                      # API only
-        ottersd serve --no-http                    # CLI only (Unix socket)
-
-      Non-loopback binds require --auth-token.
+      The daemon ships with an embedded web UI — open
+      http://127.0.0.1:5500 once it's running.
 
       Manage the service:
-        brew services restart otters    # pick up a new binary or config
-        brew services stop otters       # stop it
-        brew services list              # check status
-
-      If you skipped the provider-setup prompt:
-        otters provider add
-
-      Get started:
-        otters --help
-        otters run <Agentfile>
-        open http://127.0.0.1:5500
+        brew services restart otters
+        brew services stop otters
+        brew services list
     EOS
   end
 

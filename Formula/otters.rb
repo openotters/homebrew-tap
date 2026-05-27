@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.114"
+  version "1.0.0-alpha.115"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.114/otters_darwin_amd64.tar.gz"
-      sha256 "4ec2dc1ad7e41fa4ee55ede5261e505774cac9356515b6d45ba776d9fb1483fc"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.115/otters_darwin_amd64.tar.gz"
+      sha256 "30bacfed9e6923e29e434a800a8b7c46b0c489d8b10b2048d21416f2f6cbd164"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.114/otters_darwin_arm64.tar.gz"
-      sha256 "5633a551103f29c1480522a8fe0f7dfce64aba6d514d5b9918b68dba037c9218"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.115/otters_darwin_arm64.tar.gz"
+      sha256 "e34f15afbe33a8afe92e21beef713d52668bd1c3d8c56af1cae3150bb40db6f9"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.114/otters_linux_amd64.tar.gz"
-      sha256 "4d05add5bee0ed17b3ba8af8a19a2e29592eeae1bf610aa3877cb1a66602590f"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.115/otters_linux_amd64.tar.gz"
+      sha256 "849841856d31c6ec7ed369eb3a1d0670fa3da20fafc4e307440e014d1b2041d2"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.114/otters_linux_arm64.tar.gz"
-      sha256 "4c6014180c8d137acab039415c7a3ae4eb766752a7a7fff7c690b226cd157048"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.115/otters_linux_arm64.tar.gz"
+      sha256 "155b2667431c7aa5dec9259996c5aa969db902fc02241abf3dd7d80ed02722fe"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -49,44 +49,92 @@ class Otters < Formula
   end
 
   def post_install
-    # Upgrade case: if the launchd plist is already loaded, the
-    # old keg's ottersd is running through opt_bin/ottersd — a
-    # symlink that brew just updated to point at this new keg.
-    # `launchctl kickstart -k` makes launchd respawn the daemon
-    # against the new binary. We use launchctl directly rather
-    # than `brew services restart` because the latter fails
-    # under Homebrew's install lock (BuildError).
-    #
-    # Fresh install case: the plist doesn't exist yet. We do
-    # nothing here; caveats prompt the user for the one-time
-    # start command.
+    plist_path = Pathname.new("#{Dir.home}/Library/LaunchAgents/homebrew.mxcl.#{name}.plist")
+    socket = Pathname.new("#{Dir.home}/.otters/otters.sock")
+    uid = Process.uid
+
+    # Two paths into a running daemon, both bypassing `brew
+    # services` (which BuildErrors under Homebrew's install
+    # lock). The upgrade path bounces an existing plist; the
+    # fresh-install path writes the plist and bootstraps it
+    # via launchctl directly.
     if OS.mac?
-      plist = "#{ENV["HOME"]}/Library/LaunchAgents/homebrew.mxcl.#{name}.plist"
-      if File.exist?(plist)
-        uid = Process.uid
+      if plist_path.exist?
+        # Upgrade: kickstart bounces the daemon onto the new
+        # binary via the opt_bin symlink brew just updated.
         system "launchctl", "kickstart", "-k", "gui/#{uid}/homebrew.mxcl.#{name}"
+      elsif $stdin.tty?
+        # Fresh install: opt-in. Default Yes — Enter accepts.
+        ohai "openotters needs the daemon (ottersd) running to chat with agents."
+        print "Start it now? [Y/n] "
+        answer = ($stdin.gets || "").chomp.downcase
+        if answer.empty? || answer.start_with?("y")
+          plist_path.dirname.mkpath
+          plist_path.write(<<~XML)
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+              <key>Label</key>
+              <string>homebrew.mxcl.#{name}</string>
+              <key>ProgramArguments</key>
+              <array>
+                <string>#{opt_bin}/ottersd</string>
+                <string>serve</string>
+              </array>
+              <key>KeepAlive</key>
+              <dict>
+                <key>Crashed</key><true/>
+                <key>SuccessfulExit</key><false/>
+              </dict>
+              <key>RunAtLoad</key>
+              <true/>
+              <key>StandardOutPath</key>
+              <string>#{var}/log/ottersd.log</string>
+              <key>StandardErrorPath</key>
+              <string>#{var}/log/ottersd.err.log</string>
+            </dict>
+            </plist>
+          XML
+          system "launchctl", "bootstrap", "gui/#{uid}", plist_path.to_s
+        else
+          ohai "Skipped. Run `brew services start otters` when you're ready."
+          return
+        end
+      else
+        # Non-interactive fresh install (CI / piped). No
+        # service started; caveats document the manual start.
+        return
       end
     end
 
-    # Wait up to 10s for the daemon socket so the follow-up
-    # provider prompt has a healthy endpoint. Skipped silently
-    # if it never binds (fresh install path).
-    socket = "#{ENV["HOME"]}/.otters/otters.sock"
-    10.times do
-      break if File.socket?(socket)
+    # Health-check: poll the socket until the daemon is ready.
+    # 15s is generous on cold storage. Fail soft if it never
+    # binds — the user sees a warning and can debug via brew
+    # services list / ottersd serve.
+    ohai "Service starting..."
+    15.times do
+      break if socket.socket?
+
       sleep 1
     end
+    if socket.socket?
+      ohai "Daemon ready."
+    else
+      opoo "Daemon didn't bind its socket in 15s. Try `brew services list` " \
+           "or `#{opt_bin}/ottersd serve` to debug."
+      return
+    end
 
-    # Interactive provider-setup prompt. TTY-only — scripted /
-    # CI installs skip silently. Suppressed on upgrades where
-    # providers.yaml already exists (don't nag returning users)
-    # and on fresh installs where the daemon isn't running yet
-    # (the user sees clear caveats instead).
-    providers_yaml = "#{ENV["HOME"]}/.otters/providers.yaml"
-    return unless File.socket?(socket) && $stdin.tty? && !File.exist?(providers_yaml)
+    # Interactive provider-setup prompt. Only fires on fresh
+    # installs where the daemon is up and no provider config
+    # exists yet. Upgrades with a configured provider skip
+    # silently — don't nag returning users.
+    providers_yaml = Pathname.new("#{Dir.home}/.otters/providers.yaml")
+    return if !$stdin.tty? || providers_yaml.exist?
 
-    ohai "openotters needs a model provider to chat with agents."
-    print "Add one now? [Y/n] "
+    ohai "Add a model provider now to chat with agents."
+    print "Add one? [Y/n] "
     answer = ($stdin.gets || "").chomp.downcase
     if answer.empty? || answer.start_with?("y")
       system "#{opt_bin}/otters", "provider", "add"

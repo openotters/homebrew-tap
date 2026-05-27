@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.116"
+  version "1.0.0-alpha.117"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.116/otters_darwin_amd64.tar.gz"
-      sha256 "e01ebc680c2b98d4d1e80622037ac303d9235c03ca9786b36e8530121effa710"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.117/otters_darwin_amd64.tar.gz"
+      sha256 "f29c6ac6524fbbf58ee9898699fafe0934249b2fe75c3755fb8a019388b118ac"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.116/otters_darwin_arm64.tar.gz"
-      sha256 "e441028f2308965060808afbedb3cdf4752c25e31e273f162dfbd1c41244834a"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.117/otters_darwin_arm64.tar.gz"
+      sha256 "4a92626a16692d9b50c65ee637232d6aa17e852c84c7d09429ab396fe10208e1"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.116/otters_linux_amd64.tar.gz"
-      sha256 "b23cc21e361151c90f3452c71ab1bbb56b4ce73503fbeb683474f552f36b7742"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.117/otters_linux_amd64.tar.gz"
+      sha256 "d8d6f16277350bb6af8a3d9f08b8a0594d9f7c6327bfe739ca29628db9f97a49"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.116/otters_linux_arm64.tar.gz"
-      sha256 "7ca1d0b1c20a899c124bfea059efceb6d3de6e8e62bca66f39b9189242958075"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.117/otters_linux_arm64.tar.gz"
+      sha256 "44065830ccc62327ba472e92cbf7b83a680e6e3dc2741257aaf977ba908db273"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -74,12 +74,10 @@ class Otters < Formula
 
   def caveats
     <<~EOS
-      ⚡ First-time setup:
-        brew services start otters    # one-time, auto-starts on login + restart on upgrade
-        otters provider add           # set up your first model provider
+      🦦  First-time setup:
+        otters init     # interactive wizard: starts the daemon, picks an executor, adds a provider, spawns a starter agent, and drops you into chat — about 60 seconds end to end.
 
-      Then chat:
-        open http://127.0.0.1:5500    # or: otters chat <agent>
+      Re-run `otters init` any time; it picks up where you left off.
 
       Default paths and endpoints:
         socket:        ~/.otters/otters.sock

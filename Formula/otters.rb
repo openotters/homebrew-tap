@@ -5,13 +5,13 @@
 class Otters < Formula
   desc "Build, run, and chat with AI agents"
   homepage "https://github.com/openotters/openotters"
-  version "1.0.0-alpha.112"
+  version "1.0.0-alpha.113"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.112/otters_darwin_amd64.tar.gz"
-      sha256 "fdebb8cfc09acd0f505a3f135e7f4a28d2139b4aacb2dfddb3916f7564a50ce4"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.113/otters_darwin_amd64.tar.gz"
+      sha256 "5c824f70fb1cd3f1a531d131058db15269b85c444bb7f1ddd117a67e89f2fa89"
 
       define_method(:install) do
         bin.install "otters"
@@ -19,8 +19,8 @@ class Otters < Formula
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.112/otters_darwin_arm64.tar.gz"
-      sha256 "7c5d845b6c6dca9a73cbce8cbdaeb6583447aa7fad97bd2bcd711eada1f42693"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.113/otters_darwin_arm64.tar.gz"
+      sha256 "760963675381278b9f9760044fc374ef099f294661901fb4a7bfbef36c3fd36b"
 
       define_method(:install) do
         bin.install "otters"
@@ -31,16 +31,16 @@ class Otters < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.112/otters_linux_amd64.tar.gz"
-      sha256 "7fcbd124dff22720c4586136e2b4b54fdf779d082293791aa8a80d654063cf93"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.113/otters_linux_amd64.tar.gz"
+      sha256 "d09db6794c143493b8da3991b87625d69fabc70df50439c3ef5f4ac6ae35e7c6"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.112/otters_linux_arm64.tar.gz"
-      sha256 "be41ca89f4d629a88844e49cd2d728a81d6e934d0fb1442998c1c267a690d70d"
+      url "https://github.com/openotters/openotters/releases/download/v1.0.0-alpha.113/otters_linux_arm64.tar.gz"
+      sha256 "74fa20cf627b11746cdef26a459fe74448fce592bbc59c9a0f7b84ad8a16b682"
       define_method(:install) do
         bin.install "otters"
         bin.install "ottersd"
@@ -48,41 +48,86 @@ class Otters < Formula
     end
   end
 
+  def post_install
+    brew_bin = HOMEBREW_PREFIX/"bin/brew"
+
+    # Decide start vs restart by checking whether the service was
+    # already loaded. Fresh install → start. Upgrade with prior
+    # state → restart so the running daemon picks up the new
+    # binary. `brew services list` is the canonical source of
+    # truth — its "started" column reflects the launchd / systemd-
+    # user state, not just our hope.
+    status = `#{brew_bin} services list 2>/dev/null`
+    was_running = status.lines.any? do |line|
+      line.start_with?("otters ") && line.include?("started")
+    end
+
+    if was_running
+      system brew_bin, "services", "restart", name
+    else
+      system brew_bin, "services", "start", name
+    end
+
+    # Wait up to 10s for the daemon to bind its socket so the
+    # follow-up `otters provider add` has a healthy endpoint.
+    # Bail out silently if it never comes up — the user can run
+    # provider add later by hand.
+    socket = "#{ENV["HOME"]}/.otters/otters.sock"
+    10.times do
+      break if File.socket?(socket)
+      sleep 1
+    end
+
+    # Interactive provider-setup prompt. TTY-only — scripted /
+    # CI installs skip silently. Suppressed on upgrades where the
+    # user already has providers.yaml (don't nag returning users).
+    providers_yaml = "#{ENV["HOME"]}/.otters/providers.yaml"
+    if $stdin.tty? && !File.exist?(providers_yaml)
+      ohai "openotters needs a model provider to chat with agents."
+      print "Add one now? [Y/n] "
+      answer = ($stdin.gets || "").chomp.downcase
+      if answer.empty? || answer.start_with?("y")
+        system "#{opt_bin}/otters", "provider", "add"
+      else
+        ohai "Skipped. Run `otters provider add` when you're ready."
+      end
+    end
+  end
+
   def caveats
     <<~EOS
-      The otters daemon (ottersd) has been installed but is not running.
-
-      To run it in the background (launchd on macOS, systemd --user on Linux):
-        brew services start otters
-
-      To run it in the foreground for debugging:
-        ottersd serve
+      The otters daemon is running and will auto-start on login
+      (launchd on macOS, systemd --user on Linux).
 
       Default paths and endpoints:
         socket:        ~/.otters/otters.sock
         agent data:    ~/.otters/agents
-        logs:          #{var}/log/ottersd.{log,err.log} (service mode only)
+        logs:          #{var}/log/ottersd.{log,err.log}
         web UI + API:  http://127.0.0.1:5500  (loopback by default)
 
       The daemon ships with an embedded web UI baked into the binary —
-      no separate install. Once ottersd is running, open
-      http://127.0.0.1:5500 in your browser. The Connect/gRPC API is
-      reachable on the same listener under /api.
+      no separate install. Open http://127.0.0.1:5500 in your browser.
+      The Connect/gRPC API is reachable on the same listener under /api.
 
-      Customise the listener:
+      Customise the listener (then `brew services restart otters`):
         ottersd serve --http-addr 127.0.0.1:8080   # change the port
         ottersd serve --no-ui                      # API only
         ottersd serve --no-http                    # CLI only (Unix socket)
 
       Non-loopback binds require --auth-token.
 
-      Get started once the daemon is running:
+      Manage the service:
+        brew services restart otters    # pick up a new binary or config
+        brew services stop otters       # stop it
+        brew services list              # check status
+
+      If you skipped the provider-setup prompt:
+        otters provider add
+
+      Get started:
         otters --help
         otters run <Agentfile>
         open http://127.0.0.1:5500
-
-      Stop the service:
-        brew services stop otters
     EOS
   end
 

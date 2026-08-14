@@ -5,21 +5,21 @@
 class Holt < Formula
   desc "Reverse HTTP tunnel over a single gRPC stream, with a hub CLI and web console"
   homepage "https://github.com/openotters/holt"
-  version "0.13.0"
+  version "0.14.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/holt/releases/download/v0.13.0/holt_darwin_amd64.tar.gz"
-      sha256 "af8acbb634e81cf9fee2c7243c0eebc207be47743d0ec901a0f09f071df55d3b"
+      url "https://github.com/openotters/holt/releases/download/v0.14.0/holt_darwin_amd64.tar.gz"
+      sha256 "6ae43321b2c8585e3795c603b12c8860c2966264450f1db501d9ee1243adbd39"
 
       define_method(:install) do
         bin.install "holt"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/holt/releases/download/v0.13.0/holt_darwin_arm64.tar.gz"
-      sha256 "41aed71476306f5e2b02435e2602bc09e3af780e829c97fbfdefc6272413ecfe"
+      url "https://github.com/openotters/holt/releases/download/v0.14.0/holt_darwin_arm64.tar.gz"
+      sha256 "0c3e5d2bf2c384cf80659ea2b452c9d0ec2ea231fa0c0013c73aab97f6b7f36c"
 
       define_method(:install) do
         bin.install "holt"
@@ -29,15 +29,15 @@ class Holt < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/holt/releases/download/v0.13.0/holt_linux_amd64.tar.gz"
-      sha256 "58cb3a7068de5eaed8f87a97e0561bbad061be9bb0a9d762f7f8d0870bfc682f"
+      url "https://github.com/openotters/holt/releases/download/v0.14.0/holt_linux_amd64.tar.gz"
+      sha256 "72f05690a40b96e86d187816f5c6e70e13f2c8f58020e0bfbfa6f385e562d16b"
       define_method(:install) do
         bin.install "holt"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/holt/releases/download/v0.13.0/holt_linux_arm64.tar.gz"
-      sha256 "9979c1ba672008f5009a1a63cadc637a31d425aef991c2c32234a62e610790b2"
+      url "https://github.com/openotters/holt/releases/download/v0.14.0/holt_linux_arm64.tar.gz"
+      sha256 "71fed989ed287cdd5a2482d9b847ff3485cecd4870e151c0eea9bda572b221f0"
       define_method(:install) do
         bin.install "holt"
       end

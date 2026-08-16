@@ -5,21 +5,21 @@
 class Holt < Formula
   desc "Reverse HTTP tunnel over a single gRPC stream, with a hub CLI and web console"
   homepage "https://github.com/openotters/holt"
-  version "0.28.0"
+  version "0.29.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/openotters/holt/releases/download/v0.28.0/holt_darwin_amd64.tar.gz"
-      sha256 "8f4e6fe7f3c7116c4255ae6fd39908ca969d6891905aa7cb15114039746ca374"
+      url "https://github.com/openotters/holt/releases/download/v0.29.0/holt_darwin_amd64.tar.gz"
+      sha256 "0ae3d9527bfc438193550eaee0be93599a4b4d3f91802c265a5616df83ca2454"
 
       define_method(:install) do
         bin.install "holt"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/openotters/holt/releases/download/v0.28.0/holt_darwin_arm64.tar.gz"
-      sha256 "b68d716c6040d6fc6f8a350b503934b593e023dbf4bbb21c2ce639867dbb8134"
+      url "https://github.com/openotters/holt/releases/download/v0.29.0/holt_darwin_arm64.tar.gz"
+      sha256 "365a710f734c1ee1f975f440bfafaab275988866827114939c2b4ee4e31ae956"
 
       define_method(:install) do
         bin.install "holt"
@@ -29,15 +29,15 @@ class Holt < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/holt/releases/download/v0.28.0/holt_linux_amd64.tar.gz"
-      sha256 "959d779f38fc45a696ba0fb50e6b6db3dfd8e2f3ffa5b5327931de4194c75ce5"
+      url "https://github.com/openotters/holt/releases/download/v0.29.0/holt_linux_amd64.tar.gz"
+      sha256 "e856b42debb6e16d8b85a7ccd83f816b310c133c380489d18ca0c2326c065443"
       define_method(:install) do
         bin.install "holt"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/openotters/holt/releases/download/v0.28.0/holt_linux_arm64.tar.gz"
-      sha256 "3a2711144d06da2e18f7c90b53c7212314d3f422c354dcf7249795039675fb61"
+      url "https://github.com/openotters/holt/releases/download/v0.29.0/holt_linux_arm64.tar.gz"
+      sha256 "85dfc7222e7edac75b3cf1e485eb457e0b71beeca9bb813fe744ad46e98064fc"
       define_method(:install) do
         bin.install "holt"
       end
@@ -48,13 +48,13 @@ class Holt < Formula
     <<~EOS
       🌀  Quick start:
 
-        holt hub --ui                 # run a hub (web console on 127.0.0.1:7001)
+        holt hub --ui                 # run a hub (web console on 127.0.0.1:7201)
         holt enroll web               # mint a join token for a peer
         holt expose localhost:3000 --token <paste>   # expose a local service
 
       Reach the peer through the hub:
 
-        curl -H 'x-tunnel-peer: web' http://127.0.0.1:7002/
+        curl -H 'x-tunnel-peer: web' http://127.0.0.1:7202/
 
       Hub state (cert, JWT secret, blocklist) lives in ~/.holt
     EOS
